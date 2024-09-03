@@ -5,6 +5,7 @@
 import math
 import numpy as np
 
+
 class KalmanFilter:
     def __init__(self, A, B, H, Q, R):
         self.A = A
@@ -41,9 +42,11 @@ class KalmanFilter:
         self.X_pre = np.dot(self.A, self.X) + np.dot(self.B, self.U)
         self.P_pre = np.dot(np.dot(self.A, self.P), self.A.T) + self.Q
 
+    # S = np.dot(np.dot(self.H, self.P_pre), self.H.T) + self.R
+    # K = np.dot(np.dot(self.P_pre, self.H.T), np.linalg.inv(S))
     def __update(self, Z):
         K = np.dot(np.dot(self.P_pre, self.H.T),
-                   np.linalg.inv(np.dot(np.dot(self.H, self.P_pre), self.H.T) +\
+                   np.linalg.inv(np.dot(np.dot(self.H, self.P_pre), self.H.T) + \
                                  self.R))
         self.X = self.X_pre + np.dot(K, Z - np.dot(self.H, self.X_pre))
         self.P = self.P_pre - np.dot(np.dot(K, self.H), self.P_pre)

@@ -6,8 +6,21 @@ package(default_visibility=["//visibility:public"])
 
 cc_library(
     name = "kalmanfilter",
-    hdrs = ["kalmanfilter.h"],
-    srcs = ["kalmanfilter.cc"],
+    hdrs = ["test_00/kalmanfilter.h"],
+    srcs = ["test_00/kalmanfilter.cc"],
+    includes = ["./"],
+    deps = [
+        "//cyber",
+        "@eigen",
+        ],
+    visibility = ["//visibility:public"],
+    # copts = ["-std=c++17"],
+)
+
+cc_library(
+    name = "kf",
+    hdrs = ["test_01/kf.h"],
+    srcs = ["test_01/kf.cc"],
     includes = ["./"],
     deps = [
         "//cyber",
@@ -29,6 +42,19 @@ cc_library(
 #     visibility = ["//visibility:public"],
 #     copts = ["-std=c++17"],
 # )
+
+cc_library(
+    name = "imm",
+    hdrs = ["test_01/imm.h"],
+    srcs = ["test_01/imm.cc"],
+    includes = ["./"],
+    deps = [
+        ":kf",
+        "@eigen",
+        ],
+    visibility = ["//visibility:public"],
+    copts = ["-std=c++17"],
+)
 
 # cc_test(
 #     name = "imm_test",

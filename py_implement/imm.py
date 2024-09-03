@@ -21,7 +21,7 @@ class Imm:
         mu = np.zeros(self.P_trans.shape)
         for i in range(self.mode_cnt):
             for j in range(self.mode_cnt):
-                mu[i, j] = self.P_trans[i, j] * self.U_prob[i, 0] / u[j, 0];
+                mu[i, j] = self.P_trans[i, j] * self.U_prob[i, 0] / u[j, 0]
 
         X_mix = [np.zeros(model.X.shape) for model in self.models]
 

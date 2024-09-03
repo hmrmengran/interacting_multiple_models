@@ -71,7 +71,7 @@ void CV::init(const double& stamp, const Eigen::VectorXd& x) {
   this->R_ << 0.25, 0, 0,  
               0, 0.25, 0, 
               0, 0, 0.25;
-  this->x_ = x;  // x, y, theta, v
+  this->x_ = x;
   this->F_.resize(6, 6);
   this->H_.resize(3, 6);
   this->H_ << 1, 0, 0, 0, 0, 0, 
@@ -126,3 +126,92 @@ void CV::updateMeasurement() {
   this->z_(2) = x_(2);
   this->z_(3) = x_(3);
 }
+
+
+// CA::CA() {
+
+// }
+
+// CA::~CA() {
+
+// }
+
+// void CA::init(const double &stamp, const Eigen::VectorXd &x) {
+//     if (x.size() != 6) {
+//          std::cerr << "[error] Dismatch between State and CA model." << std::endl;
+//          exit(1);
+//     }
+//     this->current_time_stamp_ = stamp;
+//     this->P_.setIdentity(6, 6);
+//     this->R_.resize(4, 4);
+//     this->R_ << 0.25, 0, 0, 0,
+//                 0, 0.25, 0, 0,
+//                 0, 0, 5, 0,
+//                 0, 0, 0, 5;
+//     this->x_ = x; // x, y, theta, v
+//     this->F_.resize(6, 6);
+//     this->H_.resize(4, 6);      
+//     this->H_ << 1, 0,  0, 0, 0, 0,
+//                 0, 1,  0, 0, 0, 0,
+//                 0, 0,  1, 0, 0, 0,
+//                 0, 0,  0, 1, 0, 0;
+//     this->angle_mask_ = {false, false, false, false};
+//     this->z_.resize(4);
+// }
+
+// void CA::updatePrediction() {
+//     Eigen::VectorXd xt;
+//     xt.resize(6);
+//     double vx = x_(2);
+//     double vy = x_(3);
+//     double ax = x_(4);
+//     double ay = x_(5);
+//     this->F_ <<     1,   0,   dt_,  0,  1 / 2.0 * dt_ * dt_,                     0,
+//                     0,   1,   0,  dt_,                    0,   1 / 2.0 * dt_ * dt_,
+//                     0,   0,   1,    0,                  dt_,                     0,
+//                     0,   0,   0,    1,                    0,                   dt_,
+//                     0,   0,   0,    0,                    1,                     0,
+//                     0,   0,   0,    0,                    0,                     1;
+//     this->x_ = this->F_ * this->x_;
+
+//     ** CALC Process Noice Q Matrix
+
+//   {
+//       double delta_1 = dt_;
+//       double delta_2 = dt_ * dt_;
+//       double delta_3 = dt_ * dt_ * dt_; 
+//       Eigen::Matrix<double, 6, 2> G;
+//       G <<
+//                   1 / 6.0 * delta_3,                  0,
+//                                   0,  1 / 6.0 * delta_3, 
+//                   1 / 2.0 * delta_2,                  0,
+//                                   0,  1 / 2.0 * delta_2,
+//                                 dt_,                  0,
+//                                   0,                dt_;                    
+//       Eigen::Matrix2d E;
+//       E << 400, 0, 0, 400;
+//       this->Q_ = G * E * G.transpose();
+//   }
+// }
+
+// void CA::updateMeasurement() {
+// /*  观测量为 x, y, theta, v
+//     double vx = x_(2);
+//     double vy = x_(3);
+
+    
+//     this->z_(0) = x_(0);
+//     this->z_(1) = x_(1);
+//     this->z_(2) = atan2(x_(3), x_(2));
+//     this->z_(3) = sqrt(x_(2) * x_(2) + x_(3) * x_(3));
+
+//     this->H_ << 1, 0,                       0,                      0, 0, 0,
+//                 0, 1,                       0,                      0, 0, 0,
+//                 0, 0,     -vy/(vx*vx + vy*vy),     vx/(vx*vx + vy*vy), 0, 0,
+//                 0, 0,  vx/sqrt(vx*vx + vy*vy), vy/sqrt(vx*vx + vy*vy), 0, 0; */
+//     // 观测量为 x, y, vx, vy            
+//     this->z_(0) = x_(0);
+//     this->z_(1) = x_(1);
+//     this->z_(2) = x_(2);
+//     this->z_(3) = x_(3);
+// }
