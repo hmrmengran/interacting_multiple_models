@@ -9,13 +9,13 @@ namespace apollo {
 namespace seyond {
 class Imm {
  public:
-  Imm(const std::vector<KF>& models,
+  Imm(const std::vector<std::shared_ptr<KF>>& models,
       const Eigen::MatrixXd& model_trans, const Eigen::MatrixXd& P_trans,
       const Eigen::VectorXd& U_prob);
-  Eigen::VectorXd filt(const Eigen::VectorXd& Z);
+  Eigen::MatrixXd filt(const Eigen::MatrixXd& Z);
 
  private:
-  std::vector<KF> models_;
+  std::vector<std::shared_ptr<KF>> models_;
   Eigen::MatrixXd P_trans_;
   Eigen::VectorXd U_prob_;
   Eigen::MatrixXd model_trans_;
