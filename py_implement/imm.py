@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# By yongcong.wang @ 13/10/2020
 
 import math
 import numpy as np
+
 
 class Imm:
     def __init__(self, models, model_trans, P_trans, U_prob):
@@ -16,7 +15,7 @@ class Imm:
         self.dim = models[0].A.shape[0]
 
     def filt(self, Z):
-        # setp1: input mix
+        # step1: input mix
         u = np.dot(self.P_trans.T, self.U_prob)
         mu = np.zeros(self.P_trans.shape)
         for i in range(self.mode_cnt):
@@ -37,7 +36,7 @@ class Imm:
                                               (self.models[i].X - X_mix[i]).T)
                 P_mix[j] += mu[i, j] * np.dot(np.dot(self.model_trans[j][i], P),
                                               self.model_trans[j][i].T)
-        ## step2: filt
+        # step2: filt
         for j in range(self.mode_cnt):
             self.models[j].X = X_mix[j]
             self.models[j].P = P_mix[j]

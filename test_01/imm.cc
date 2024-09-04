@@ -3,8 +3,8 @@
 namespace apollo {
 namespace seyond {
 Imm::Imm(const std::vector<std::shared_ptr<KF>>& models,
-         const Eigen::MatrixXd& model_trans, const Eigen::MatrixXd& P_trans,
-         const Eigen::VectorXd& U_prob)
+         const std::vector<std::vector<Eigen::MatrixXd>>& model_trans,
+         const Eigen::MatrixXd& P_trans, const Eigen::VectorXd& U_prob)
     : models_(models),
       P_trans_(P_trans),
       U_prob_(U_prob),
@@ -21,25 +21,30 @@ Eigen::MatrixXd Imm::filt(const Eigen::MatrixXd& Z) {
     }
   }
 
-  // Use std::vector to dynamically store matrices
   std::vector<std::unique_ptr<Eigen::MatrixXd>> X_mix(mode_cnt_);
-  std::vector<std::unique_ptr<Eigen::MatrixXd>> P_mix(mode_cnt_);
 
   for (int j = 0; j < mode_cnt_; ++j) {
     X_mix[j] = std::make_unique<Eigen::MatrixXd>(models_[j]->X_.rows(),
                                                  models_[j]->X_.cols());
-    // P_mix[j] = std::make_unique<Eigen::MatrixXd>(models_[j]->P_.rows(),
-    //                                              models_[j]->P_.cols());
-
     X_mix[j]->setZero();
-    // P_mix[j]->setZero();
-
     for (int i = 0; i < mode_cnt_; ++i) {
       Eigen::MatrixXd X_i = models_[i]->X_;
-      // Eigen::MatrixXd P_i = models_[i]->P_;
+      *X_mix[j] += model_trans_[j][i] * X_i * mu(i, j);
+    }
+  }
 
-      *X_mix[j] += model_trans_(j, i) * X_i * mu(i, j);
-      // *P_mix[j] += mu(i, j) * model_trans_ * P_i * model_trans_.transpose();
+  std::vector<std::unique_ptr<Eigen::MatrixXd>> P_mix(mode_cnt_);
+  for (int j = 0; j < mode_cnt_; ++j) {
+    P_mix[j] = std::make_unique<Eigen::MatrixXd>(models_[j]->P_.rows(),
+                                                 models_[j]->P_.cols());
+    P_mix[j]->setZero();
+    for (int i = 0; i < mode_cnt_; ++i) {
+      Eigen::MatrixXd P(models_[i]->P_.rows(), models_[i]->P_.cols());
+      P.setZero();
+      P = models_[i]->P_ + (models_[i]->X_ - *X_mix[j]) *
+                               (models_[i]->X_ - *X_mix[j]).transpose();
+      P_mix[j] +=
+          mu(i, j) * (model_trans_[j][i] * P) * model_trans_[j][i].transpose();
     }
   }
 

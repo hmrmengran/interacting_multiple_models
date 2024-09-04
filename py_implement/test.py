@@ -91,6 +91,7 @@ def imm_cvat():
         [0, 0, 0, 1],
         [0, 0, 0, 0]
     ])
+
     T23 = np.array([
         [1, 0, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
@@ -98,6 +99,7 @@ def imm_cvat():
         [0, 0, 0, 0, 1, 0],
         [0, 0, 0, 0, 0, 0]
     ])
+
     model_trans = [
         [np.eye(models[0].A.shape[0]), T12.T, np.dot(T12.T, T23.T)],
         [T12, np.eye(models[1].A.shape[0]), T23.T],

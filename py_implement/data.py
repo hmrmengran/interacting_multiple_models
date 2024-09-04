@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# By yongcong.wang @ 13/10/2020
 
 import math
 import numpy as np
