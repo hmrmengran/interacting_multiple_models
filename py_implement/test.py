@@ -160,6 +160,10 @@ def z_data():
 
     return z_std
 
+def save_to_file(filename, data):
+    # 将数据保存为CSV文件
+    np.savetxt(filename, data, delimiter=',')
+
 
 def test_cvt():
     z_std = z_data()
@@ -169,8 +173,10 @@ def test_cvt():
         [5.],
         [.2]
     ]))
+    # z_noise = np.array(z_noise)
+    # save_to_file('z_noise.csv', z_noise.reshape(z_noise.shape[0], -1))
 
-    imm = imm_cvt();
+    imm = imm_cvt()
     z0 = z_noise[0]
     imm.models[0].X = np.array([
         [z0[0, 0]],
@@ -220,7 +226,7 @@ def test_cvt():
     plot_show()
 
 
-#test_cvt()
+test_cvt()
 
 def test_cvat():
     z_std = z_data()
@@ -443,4 +449,4 @@ def test_imm_veh_pred():
     plot_show()
 
 
-test_imm_veh_pred()
+# test_imm_veh_pred()

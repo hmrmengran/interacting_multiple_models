@@ -49,7 +49,7 @@ Eigen::MatrixXd Imm::filt(const Eigen::MatrixXd& Z) {
   for (int j = 0; j < mode_cnt_; ++j) {
     models_[j]->X_ = *X_mix[j];
     models_[j]->P_ = *P_mix[j];
-    models_[j]->filt_(Z);  // Assuming `filt_` is correctly defined in KF
+    models_[j]->filt_(Z);
   }
 
   // Update probabilities
