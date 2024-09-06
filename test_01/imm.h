@@ -10,7 +10,7 @@ namespace seyond {
 class Imm {
  public:
   Imm(const std::vector<std::shared_ptr<KF>>& models,
-      const std::vector<std::vector<Eigen::MatrixXd>>& model_trans,
+      const std::vector<std::vector<std::shared_ptr<Eigen::MatrixXd>>>& model_trans,
       const Eigen::MatrixXd& P_trans, const Eigen::VectorXd& U_prob);
   Eigen::MatrixXd filt(const Eigen::MatrixXd& Z);
 
@@ -18,7 +18,7 @@ class Imm {
   std::vector<std::shared_ptr<KF>> models_;
   Eigen::MatrixXd P_trans_;
   Eigen::VectorXd U_prob_;
-  Eigen::MatrixXd model_trans_;
+  std::vector<std::vector<std::shared_ptr<Eigen::MatrixXd>>> model_trans_;
 
   int mode_cnt_;
 };

@@ -21,7 +21,7 @@ KF::KF(Eigen::MatrixXd A, Eigen::MatrixXd H) {
   H_ = H;
   B_ = Eigen::MatrixXd::Identity(A.rows(), A.cols());
   Q_ = Eigen::MatrixXd::Identity(A.rows(), A.cols());
-  //   4*4
+  // 2*2
   R_ = Eigen::MatrixXd::Identity(H.rows(), H.rows());
 
   U_ = Eigen::VectorXd::Zero(B_.cols());

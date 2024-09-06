@@ -9,10 +9,11 @@
 namespace apollo {
 namespace seyond {
 class KF {
+    public:
   KF(Eigen::MatrixXd A, Eigen::MatrixXd B, Eigen::MatrixXd H, Eigen::MatrixXd Q,
      Eigen::MatrixXd R);
   KF(Eigen::MatrixXd A, Eigen::MatrixXd H);
-  public:
+
   Eigen::VectorXd filt_(Eigen::VectorXd Z);
 
  private:

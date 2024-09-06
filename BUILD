@@ -4,18 +4,18 @@ load("//tools:cpplint.bzl", "cpplint")
 
 package(default_visibility=["//visibility:public"])
 
-cc_library(
-    name = "kalmanfilter",
-    hdrs = ["test_00/kalmanfilter.h"],
-    srcs = ["test_00/kalmanfilter.cc"],
-    includes = ["./"],
-    deps = [
-        "//cyber",
-        "@eigen",
-        ],
-    visibility = ["//visibility:public"],
-    # copts = ["-std=c++17"],
-)
+# cc_library(
+#     name = "kalmanfilter",
+#     hdrs = ["test_00/kalmanfilter.h"],
+#     srcs = ["test_00/kalmanfilter.cc"],
+#     includes = ["./"],
+#     deps = [
+#         "//cyber",
+#         "@eigen",
+#         ],
+#     visibility = ["//visibility:public"],
+#     # copts = ["-std=c++17"],
+# )
 
 cc_library(
     name = "kf",
@@ -32,8 +32,8 @@ cc_library(
 
 # cc_library(
 #     name = "immkf",
-#     hdrs = ["immkf.h"],
-#     srcs = ["immkf.cc"],
+#     hdrs = ["test_00/immkf.h"],
+#     srcs = ["test_00/immkf.cc"],
 #     includes = ["./"],
 #     deps = [
 #         ":kalmanfilter",
@@ -56,17 +56,17 @@ cc_library(
     copts = ["-std=c++17"],
 )
 
-# cc_test(
-#     name = "imm_test",
-#     srcs = ["imm_test.cc"],
-#     deps = [
-#         ":immkf",
-#         ":kalmanfilter",
-#         "@com_google_googletest//:gtest_main",
-#     ],
-#     linkopts = ["-lm"],
-#     # copts = ["-std=c++17"],
-# )
+cc_test(
+    name = "imm_test",
+    srcs = ["test_01/imm_test.cc"],
+    deps = [
+        ":kf",
+        ":imm",
+        "@com_google_googletest//:gtest_main",
+    ],
+    linkopts = ["-lm"],
+    # copts = ["-std=c++17"],
+)
 
 # filegroup(
 #     name = "runtime_data",
