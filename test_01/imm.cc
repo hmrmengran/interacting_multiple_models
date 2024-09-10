@@ -23,6 +23,7 @@ Eigen::MatrixXd Imm::filt(const Eigen::MatrixXd& Z) {
 
   std::vector<std::shared_ptr<Eigen::MatrixXd>> X_mix(mode_cnt_);
 
+  std::cout << "X_mix start" << std::endl;
   for (int j = 0; j < mode_cnt_; ++j) {
     X_mix[j] = std::make_unique<Eigen::MatrixXd>(models_[j]->X_.rows(),
                                                  models_[j]->X_.cols());
@@ -32,21 +33,26 @@ Eigen::MatrixXd Imm::filt(const Eigen::MatrixXd& Z) {
       *X_mix[j] += (*model_trans_[j][i]) * X_i * mu(i, j);
     }
   }
+  std::cout << "X_mix end" << std::endl;
 
+  std::cout << "P_mix start" << std::endl;
   std::vector<std::shared_ptr<Eigen::MatrixXd>> P_mix(mode_cnt_);
   for (int j = 0; j < mode_cnt_; ++j) {
     P_mix[j] = std::make_unique<Eigen::MatrixXd>(models_[j]->P_.rows(),
                                                  models_[j]->P_.cols());
     P_mix[j]->setZero();
     for (int i = 0; i < mode_cnt_; ++i) {
-      Eigen::MatrixXd P = models_[i]->P_ + 
-                          (models_[i]->X_ - *X_mix[j]) * (models_[i]->X_ - *X_mix[j]).transpose();
+      //Explicitly convert VectorXd to MatrixXd
+      Eigen::MatrixXd X_matrix = models_[i]->X_.matrix();
+      Eigen::MatrixXd P = models_[i]->P_ + ((X_matrix - *X_mix[i])) * ((X_matrix - *X_mix[i])).transpose();
       *P_mix[j] += mu(i, j) * (*model_trans_[j][i] * P) * model_trans_[j][i]->transpose();
     }
   }
+  std::cout << "P_mix end" << std::endl;
 
   // Apply the filtering step
   for (int j = 0; j < mode_cnt_; ++j) {
+    std::cout << "Model: " << j << std::endl;
     models_[j]->X_ = *X_mix[j];
     models_[j]->P_ = *P_mix[j];
     models_[j]->filt_(Z);

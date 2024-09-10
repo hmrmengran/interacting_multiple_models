@@ -4,6 +4,48 @@
 #include "kf.h"
 namespace apollo {
 namespace seyond {
+#include <fstream>
+#include <sstream>
+#include <tuple>
+using DataTuple = std::tuple<double, double, double, double>;
+
+std::vector<DataTuple> readCSV(const std::string &filename) {
+  std::vector<DataTuple> data;
+  std::ifstream file(filename);
+
+  if (!file.is_open()) {
+    std::cerr << "Error opening file: " << filename << std::endl;
+    return data;
+  }
+
+  std::string line;
+  // Read and ignore the header
+  std::getline(file, line);
+
+  while (std::getline(file, line)) {
+    std::stringstream ss(line);
+    std::string value;
+    double x, vx, y, vy;
+
+    // Read x, vx, y, vy in order
+    std::getline(ss, value, ',');
+    x = std::stod(value);
+
+    std::getline(ss, value, ',');
+    vx = std::stod(value);
+
+    std::getline(ss, value, ',');
+    y = std::stod(value);
+
+    std::getline(ss, value, ',');
+    vy = std::stod(value);
+
+    data.emplace_back(x, vx, y, vy);
+  }
+
+  file.close();
+  return data;
+}
 
 class KFTest : public ::testing::Test {
  protected:
@@ -11,20 +53,27 @@ class KFTest : public ::testing::Test {
     // CV Model (Constant Velocity Model)
     A_cv_ = Eigen::MatrixXd(4, 4);
     H_cv_ = Eigen::MatrixXd(2, 4);
-    A_cv_ << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
+    A_cv_ << 1, dt, 0, 0, 
+             0,  1, 0, 0, 
+             0,  0, 1, dt, 
+             0,  0, 0, 1;
     H_cv_ << 1, 0, 0, 0, 0, 0, 1, 0;
     cv_ = std::make_shared<KF>(A_cv_, H_cv_);
 
     // CA Model (Constant Acceleration Model)
     A_ca_ = Eigen::MatrixXd(6, 6);
     H_ca_ = Eigen::MatrixXd(2, 6);
-    A_ca_ << 1, dt, 0.5 * dt * dt, 0, 0, 0, 0, 1, dt, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 1, dt, 0.5 * dt * dt, 0, 0, 0, 0, 1, dt, 0, 0, 0, 0, 0, 1;
-    H_ca_ << 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0;
+    A_ca_ << 1, dt,  0.5 * dt * dt, 0,  0,             0, 
+             0,  1,             dt, 0,  0,             0, 
+             0,  0,              1, 0,  0,             0,  
+             0,  0,              0, 1, dt, 0.5 * dt * dt, 
+             0,  0,              0, 0,  1,            dt, 
+             0,  0,              0, 0,  0,             1;
+    H_ca_ << 1, 0, 0, 0, 0, 0, 
+             0, 0, 0, 1, 0, 0;
     ca_ = std::make_shared<KF>(A_ca_, H_ca_);
 
     // CT Model (Constant Turn Model)
-
     A_ct_ = Eigen::MatrixXd(5, 5);
     H_ct_ = Eigen::MatrixXd(2, 5);
     A_ct_ << 1.0, std::sin(theta) / dtheta, 0.0,
@@ -32,7 +81,8 @@ class KFTest : public ::testing::Test {
         -std::sin(theta), 0.0, 0.0, (1.0 - std::cos(theta)) / dtheta, 1.0,
         std::sin(theta) / dtheta, 0.0, 0.0, std::sin(theta), 0.0,
         std::cos(theta), 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
-    H_ct_ << 1, 0, 0, 0, 0, 0, 0, 1, 0, 0;
+    H_ct_ << 1, 0, 0, 0, 0, 
+             0, 0, 1, 0, 0;
     ct_ = std::make_shared<KF>(A_ct_, H_ct_);
   }
 
@@ -89,26 +139,31 @@ TEST_F(KFTest, CVT_Test) {
   U_prob << 0.5, 0.5;
   std::vector<std::shared_ptr<KF>> models = {cv_, ct_};
   Eigen::MatrixXd r(2, 1);
-  r << 10.0, 1.0;
+  r << 10.0, 10.0;
 
-  for (auto& model : models) {
-    model->R_ *= r;
+  // braodcast r to all models
+  for (auto &model : models) {
+    ACHECK(model->R_.rows() == r.rows());
+    Eigen::MatrixXd R = model->R_;
+    for (int i = 0; i < R.rows(); ++i) {
+      model->R_.row(i) = R.row(i) * r(i);
+    }
   }
 
   Eigen::MatrixXd T12(6, 4);
-  T12 << 1, 0, 0, 0,
-         0, 1, 0, 0,
-         0, 0, 0, 0,
-         0, 0, 1, 0,
-         0, 0, 0, 1,
-         0, 0, 0, 0;
+  T12 << 1, 0, 0, 0, 
+        0, 1, 0, 0, 
+        0, 0, 0, 0, 
+        0, 0, 1, 0, 
+        0, 0, 0, 1, 
+        0, 0, 0, 0;
 
   Eigen::MatrixXd T23(5, 6);
-  T23 << 1, 0, 0, 0, 0, 0,
-          0, 1, 0, 0, 0, 0,
-          0, 0, 0, 1, 0, 0,
-          0, 0, 0, 0, 1, 0,
-          0, 0, 0, 0, 0, 0;
+  T23 << 1, 0, 0, 0, 0, 0, 
+        0, 1, 0, 0, 0, 0, 
+        0, 0, 0, 1, 0, 0, 
+        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0;
 
   Eigen::MatrixXd T13 = T23 * T12;
   std::vector<std::vector<std::shared_ptr<Eigen::MatrixXd>>> model_trans = {
@@ -119,6 +174,19 @@ TEST_F(KFTest, CVT_Test) {
        std::make_shared<Eigen::MatrixXd>(Eigen::MatrixXd::Identity(
            models[1]->A_.rows(), models[1]->A_.cols()))}};
   Imm imm(models, model_trans, P_trans, U_prob);
+  std::string filename = "/apollo/modules/omnisense/interacting_multiple_models/py_implement/z_noise.csv";
+  std::vector<DataTuple> data = readCSV(filename);
+  AERROR << "data size: " << data.size();
+
+  imm.models_[0]->X_ << std::get<0>(data[0]), 0, std::get<2>(data[0]), 0;
+  imm.models_[1]->X_ << std::get<0>(data[0]), 0, std::get<2>(data[0]), 0, 0;
+  std::vector<std::shared_ptr<Eigen::MatrixXd>> vec_prob;;
+  for (auto const &d : data) {
+    Eigen::VectorXd Z(2);
+    Z << std::get<0>(d), std::get<2>(d);
+    vec_prob.push_back(std::make_shared<Eigen::MatrixXd>(imm.filt(Z)));
+  }
+  AINFO << "vec_prob size: " << vec_prob.size();
 }
 
 int main(int argc, char **argv) {

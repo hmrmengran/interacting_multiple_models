@@ -160,9 +160,13 @@ def z_data():
 
     return z_std
 
-def save_to_file(filename, data):
-    # 将数据保存为CSV文件
-    np.savetxt(filename, data, delimiter=',')
+def save_to_file(filename, data, headers=None):
+    if headers is not None:
+        with open(filename, 'w') as f:
+            f.write(','.join(headers) + '\n')
+            np.savetxt(f, data, delimiter=',')
+    else:
+        np.savetxt(filename, data, delimiter=',')
 
 
 def test_cvt():
@@ -173,8 +177,10 @@ def test_cvt():
         [5.],
         [.2]
     ]))
-    # z_noise = np.array(z_noise)
-    # save_to_file('z_noise.csv', z_noise.reshape(z_noise.shape[0], -1))
+
+    z_noise = np.array(z_noise)
+    headers = ['x', 'vx', 'y', 'vy'] 
+    save_to_file('z_noise.csv', z_noise.reshape(z_noise.shape[0], -1), headers)
 
     imm = imm_cvt()
     z0 = z_noise[0]
