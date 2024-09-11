@@ -178,8 +178,10 @@ def test_cvt():
         [.2]
     ]))
 
+    z_std = np.array(z_std)
     z_noise = np.array(z_noise)
-    headers = ['x', 'vx', 'y', 'vy'] 
+    headers = ['x', 'vx', 'y', 'vy']
+    save_to_file('z_std.csv', z_std.reshape(z_noise.shape[0], -1), headers)
     save_to_file('z_noise.csv', z_noise.reshape(z_noise.shape[0], -1), headers)
 
     imm = imm_cvt()
@@ -243,7 +245,7 @@ def test_cvat():
         [2]
     ]))
 
-    imm = imm_cvat();
+    imm = imm_cvat()
     z0 = z_noise[0]
     imm.models[0].X = np.array([
         [z0[0, 0]],

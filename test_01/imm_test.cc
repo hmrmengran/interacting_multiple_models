@@ -47,6 +47,37 @@ std::vector<DataTuple> readCSV(const std::string &filename) {
   return data;
 }
 
+void writeCSV(const std::string &filename, const std::vector<Eigen::MatrixXd> &vec_z_filt, const std::vector<std::string> &headers) {
+    std::ofstream file(filename);
+    
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    // table header
+    for (size_t i = 0; i < headers.size(); ++i) {
+        file << headers[i];
+        if (i != headers.size() - 1) {
+            file << ",";
+        }
+    }
+    file << "\n";
+
+    // dump data
+    for (const auto &row : vec_z_filt) {
+        for (int i = 0; i < row.rows(); ++i) {
+            file << row(i);
+            if (i != row.rows() - 1) {
+                file << ",";
+            }
+        }
+        file << "\n";
+    }
+
+    file.close();
+}
+
 class KFTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -180,13 +211,29 @@ TEST_F(KFTest, CVT_Test) {
 
   imm.models_[0]->X_ << std::get<0>(data[0]), 0, std::get<2>(data[0]), 0;
   imm.models_[1]->X_ << std::get<0>(data[0]), 0, std::get<2>(data[0]), 0, 0;
-  std::vector<std::shared_ptr<Eigen::MatrixXd>> vec_prob;;
+  std::vector<std::shared_ptr<Eigen::MatrixXd>> vec_prob;
+  std::vector<Eigen::MatrixXd> vec_z_filt;
   for (auto const &d : data) {
     Eigen::VectorXd Z(2);
     Z << std::get<0>(d), std::get<2>(d);
-    vec_prob.push_back(std::make_shared<Eigen::MatrixXd>(imm.filt(Z)));
+    auto U_prob = imm.filt(Z);
+    for (int i = 0; i < U_prob.rows(); ++i) {
+      AERROR << "U_prob[" << i << "]: " << U_prob(i, 0);
+    }
+    vec_prob.push_back(std::make_shared<Eigen::MatrixXd>(U_prob));
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(imm.models_[0]->X_.rows());
+    for (size_t i = 0; i < imm.models_.size(); ++i) {
+      x += (*imm.model_trans_[0][i]) * imm.models_[i]->X_ * U_prob(i, 0);
+    }
+    vec_z_filt.push_back(x);
   }
   AINFO << "vec_prob size: " << vec_prob.size();
+  std::string output_filename =
+      "/apollo/modules/omnisense/interacting_multiple_models/py_implement/"
+      "z_filt.csv";
+  std::vector<std::string> headers = {"x", "vx", "y", "vy"};
+  writeCSV(output_filename, vec_z_filt, headers);
 }
 
 int main(int argc, char **argv) {
