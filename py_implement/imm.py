@@ -44,9 +44,9 @@ class Imm:
 
         ### step3: update probability
         for j in range(self.mode_cnt):
-            mode = self.models[j]
-            D = Z - np.dot(mode.H, mode.X_pre)
-            S = np.dot(np.dot(mode.H, mode.P_pre), mode.H.T) + mode.R
+            model = self.models[j]
+            D = Z - np.dot(model.H, model.X_pre)
+            S = np.dot(np.dot(model.H, model.P_pre), model.H.T) + model.R
 
             Lambda = (np.linalg.det(2 * math.pi * S)) ** (-0.5) * \
                      np.exp(-0.5 * np.dot(np.dot(D.T, np.linalg.inv(S)), D))

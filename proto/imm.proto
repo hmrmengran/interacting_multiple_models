@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+package omnisense.imm;
+
+message Conf{
+  optional string std_file = 1;
+  optional string noise_file = 2;
+  optional string filter_file = 3;
+  optional string u_prob_file = 4;
+}
+
+

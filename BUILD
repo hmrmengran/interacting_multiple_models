@@ -63,6 +63,7 @@ cc_test(
         ":kf",
         ":imm",
         "@com_google_googletest//:gtest_main",
+        "//modules/omnisense/interacting_multiple_models/proto:imm_config_cc_proto",
     ],
     linkopts = ["-lm"],
     # copts = ["-std=c++17"],

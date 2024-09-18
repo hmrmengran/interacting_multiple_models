@@ -61,12 +61,23 @@ Eigen::MatrixXd Imm::filt(const Eigen::MatrixXd& Z) {
   // Update probabilities
   Eigen::MatrixXd updated_U_prob(mode_cnt_, 1);
   for (int j = 0; j < mode_cnt_; ++j) {
-    Eigen::MatrixXd D = Z - models_[j]->H_ * models_[j]->X_;
-    Eigen::MatrixXd S = models_[j]->H_ * models_[j]->P_ * models_[j]->H_.transpose() + models_[j]->R_;
+    Eigen::VectorXd D = Z - models_[j]->H_ * models_[j]->X_pre_;
+    Eigen::MatrixXd S =
+        models_[j]->H_ * models_[j]->P_pre_ * models_[j]->H_.transpose() +
+        models_[j]->R_;
 
-    Eigen::MatrixXd result_matrix = -0.5 * (D.transpose() * S.inverse() * D);
-    double result = result_matrix.sum();
-    double Lambda = std::pow((2 * M_PI * S).determinant(), -0.5) * std::exp(result);
+    // Ensure S is symmetric positive definite
+    Eigen::MatrixXd S_inv = S.inverse();
+
+    // Compute the exponent term
+    auto exponent = -0.5 * D.transpose() * S_inv * D;
+    // Extract scalar from 1x1 matrix
+    double exponent_value = exponent(0, 0);
+
+    // Compute the likelihood (Lambda)
+    double det_S = S.determinant();
+    double Lambda = std::pow(2 * M_PI, -Z.size() / 2.0) *
+                    std::pow(det_S, -0.5) * std::exp(exponent_value);
 
     updated_U_prob(j, 0) = Lambda * u(j, 0);
   }

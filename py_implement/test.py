@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# By yongcong.wang @ 13/10/2020
 import math
 import numpy as np
 
@@ -160,13 +158,7 @@ def z_data():
 
     return z_std
 
-def save_to_file(filename, data, headers=None):
-    if headers is not None:
-        with open(filename, 'w') as f:
-            f.write(','.join(headers) + '\n')
-            np.savetxt(f, data, delimiter=',')
-    else:
-        np.savetxt(filename, data, delimiter=',')
+
 
 
 def test_cvt():
@@ -234,7 +226,7 @@ def test_cvt():
     plot_show()
 
 
-test_cvt()
+# test_cvt()
 
 def test_cvat():
     z_std = z_data()
@@ -303,12 +295,12 @@ def test_cvat():
     plot_show()
 
 
-#test_cvat()
+test_cvat()
 
 def test_imm_veh():
     z_noise = data.veh_z_mia()
 
-    imm = imm_cvat();
+    imm = imm_cvat()
     z0 = z_noise[0]
     imm.models[0].X = np.array([
         [z0[0, 0]],
@@ -370,7 +362,7 @@ def test_imm_veh():
 def test_imm_veh_pred():
     z_noise = data.veh_z_mia()
 
-    imm = imm_cvat();
+    imm = imm_cvat()
     z0 = z_noise[0]
     imm.models[0].X = np.array([
         [z0[0, 0]],

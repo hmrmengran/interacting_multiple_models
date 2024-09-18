@@ -28,7 +28,8 @@ class KalmanFilter:
         self.U = np.zeros((self.B.shape[1], 1))
         self.X = np.zeros((A.shape[0], 1))
         self.X_pre = self.X
-        self.P = np.zeros(A.shape)
+        # self.P = np.zeros(A.shape)
+        self.P = np.eye(A.shape[0]) * 1.0
         self.P_pre = self.P
 
     def filt(self, Z):

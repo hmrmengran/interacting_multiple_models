@@ -38,15 +38,32 @@ Eigen::VectorXd KF::filt_(Eigen::VectorXd Z) {
 }
 
 void KF::predict_() {
-  X_ = A_ * X_ + B_ * U_;
-  P_ = A_ * P_ * A_.transpose() + Q_;
+  X_pre_ = A_ * X_ + B_ * U_;
+  P_pre_ = A_ * P_ * A_.transpose() + Q_;
 }
 
+// void KF::update_(Eigen::VectorXd Z) {
+//   // Regularization parameter to improve numerical stability
+//   double epsilon = 1e-6;
+//   Eigen::MatrixXd S = H_ * P_pre_ * H_.transpose() + R_;
+//   S += epsilon * Eigen::MatrixXd::Identity(S.rows(), S.cols());
+//   // Use Cholesky decomposition for the Kalman gain calculation
+//   Eigen::LLT<Eigen::MatrixXd> lltOfS(S);
+//   Eigen::MatrixXd K =
+//       P_pre_ * H_.transpose() *
+//       lltOfS.solve(Eigen::MatrixXd::Identity(S.rows(), S.cols()));
+//   // Update state estimate
+//   X_ = X_pre_ + K * (Z - H_ * X_pre_);
+//   // Update covariance estimate
+//   P_ = P_pre_ - K * H_ * P_pre_;
+// }
+
 void KF::update_(Eigen::VectorXd Z) {
-  Eigen::MatrixXd S = H_ * P_ * H_.transpose() + R_;
-  Eigen::MatrixXd K = P_ * H_.transpose() * S.inverse();
-  X_ = X_ + K * (Z - H_ * X_);
-  P_ = (Eigen::MatrixXd::Identity(P_.rows(), P_.cols()) - K * H_) * P_;
+  Eigen::MatrixXd S = H_ * P_pre_ * H_.transpose() + R_;
+  Eigen::MatrixXd K = P_pre_ * H_.transpose() * S.inverse();
+  X_ = X_pre_ + K * (Z - H_ * X_pre_);
+  P_ = (Eigen::MatrixXd::Identity(P_pre_.rows(), P_pre_.cols()) - K * H_) * P_pre_;
 }
+
 }  // namespace seyond
 }  // namespace apollo
